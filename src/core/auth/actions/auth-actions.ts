@@ -1,3 +1,4 @@
+import axios from "axios";
 import { productsApi } from "../api/productsApi";
 import { User } from "../interface/user";
 
@@ -46,7 +47,8 @@ export const authLogin = async (email: string, password: string) => {
         return returnUserToken(data);
 
     } catch (error) {
-        throw new Error('Error al iniciar sesión');
+        //throw new Error('Error al iniciar sesión');
+        return null;
     }
 }
 
@@ -57,9 +59,43 @@ export const authCheckStatus = async () => {
         return returnUserToken(data);
 
     } catch (error) {
-
+        return null;
     }
 }
 
 
-// TODO: tarea: hacer el register
+export const authRegister = async (fullName: string, email: string, password: string) => {
+    email = email.toLocaleLowerCase();
+    try {
+
+        const { data } = await productsApi.post<AuthResponse>('/auth/register', {
+            fullName,
+            email,
+            password
+        });
+
+        const { user, token } = returnUserToken(data);
+        return { ok: true as const, user, token };
+
+    } catch (error) {
+        let message = 'Error al crear la cuenta';
+
+        if (axios.isAxiosError(error)) {
+            const backendMessage = error.response?.data?.message;
+            if (Array.isArray(backendMessage)) {
+                message = backendMessage[0];
+            } else if (typeof backendMessage === 'string') {
+                message = backendMessage;
+            }
+        }
+
+        // Mapeo amigable para el usuario
+        if (message.includes('The password must have a Uppercase, lowercase letter and a number')) {
+            message = 'La contraseña debe incluir al menos una mayúscula, una minúscula y un número';
+        } else if (message.includes('already exists') || message.includes('ya existe')) {
+            message = 'Este correo electrónico ya está registrado';
+        }
+
+        return { ok: false as const, message };
+    }
+}

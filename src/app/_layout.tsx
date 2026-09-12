@@ -1,14 +1,17 @@
+import { useTheme } from "@/presentation/theme/hooks/use-theme";
 import { useFonts } from "expo-font";
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useColorScheme } from "react-native";
-import { AnimatedSplashOverlay } from "../presentation/theme/components/animated-icon";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => { });
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const backgroundColor = useTheme().background
+
 
   const [fontsLoaded, fontError] = useFonts({
     MonserratBold: require("@/assets/fonts/MontserratAlternates-Bold.ttf"),
@@ -18,21 +21,25 @@ export default function TabLayout() {
 
   useEffect(() => {
     if (fontError) throw fontError;
-  }, [fontError]);
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(() => { });
+    }
+  }, [fontsLoaded, fontError]);
 
   if (!fontsLoaded && !fontError) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <Stack screenOptions={{
-        headerShown: false,
-      }}>
+    <GestureHandlerRootView style={{ backgroundColor: backgroundColor, flex: 1 }}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{
+          headerShown: false,
+        }}>
+        </Stack>
+      </ThemeProvider>
+    </GestureHandlerRootView>
 
-      </Stack>
-    </ThemeProvider>
   );
 }
 

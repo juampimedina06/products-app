@@ -5,14 +5,14 @@ import { useTheme } from "../hooks/use-theme";
 
 export type ThemedTextProps = TextProps & {
   type?:
-    | "default"
-    | "title"
-    | "small"
-    | "smallBold"
-    | "subtitle"
-    | "link"
-    | "linkPrimary"
-    | "code";
+  | "default"
+  | "title"
+  | "small"
+  | "smallBold"
+  | "subtitle"
+  | "link"
+  | "linkPrimary"
+  | "code";
   themeColor?: ThemeColor;
 };
 
@@ -60,12 +60,13 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   title: {
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: 600,
     lineHeight: 52,
+    fontFamily: 'MonserratBold'
   },
   subtitle: {
-    fontSize: 32,
+    fontSize: 20,
     lineHeight: 44,
     fontWeight: 600,
   },
