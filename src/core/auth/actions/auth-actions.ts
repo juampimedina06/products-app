@@ -1,5 +1,5 @@
+import { productsApi } from "@/core/api/productsApi";
 import axios from "axios";
-import { productsApi } from "../api/productsApi";
 import { User } from "../interface/user";
 
 export interface AuthResponse {

@@ -19,7 +19,7 @@ export const Colors = {
   },
   dark: {
     text: '#ffffff',
-    background: '#1F2B43',
+    background: '#0f0303',
     backgroundElement: '#212225',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',

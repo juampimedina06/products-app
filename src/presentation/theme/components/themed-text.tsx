@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     fontWeight: 500,
   },
   title: {
-    fontSize: 32,
+    fontSize: 20,
     fontWeight: 600,
     lineHeight: 52,
     fontFamily: 'MonserratBold'

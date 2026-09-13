@@ -46,7 +46,7 @@ export default ThemeButton
 const styles = StyleSheet.create({
     button: {
         paddingHorizontal: 10,
-        paddingVertical: 15,
+        paddingVertical: 10,
         borderRadius: 5,
         alignItems: 'center',
         flexDirection: 'row',
