@@ -1,6 +1,7 @@
 import { Size } from '@/core/products/interfaces/product.interface'
 import ProductImages from '@/presentation/products/components/ProductImages'
 import { useProduct } from '@/presentation/products/hooks/useProduct'
+import { useCameraStore } from '@/presentation/store/useCameraStore'
 import MenuIconButton from '@/presentation/theme/components/MenuIconButton'
 import { ThemedView } from '@/presentation/theme/components/themed-view'
 import ThemeButton from '@/presentation/theme/components/ThemedButton'
@@ -13,10 +14,18 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, View } f
 
 const ProductScreen = () => {
 
+    const { selectedImagens, clearImages } = useCameraStore();
+
     const { id } = useLocalSearchParams()
     const navigation = useNavigation()
 
     const { productQuery, productMutation } = useProduct(`${id}`)
+
+    useEffect(() => {
+        return () => {
+            clearImages();
+        }
+    }, [])
 
     useEffect(() => {
         navigation.setOptions({
@@ -62,7 +71,7 @@ const ProductScreen = () => {
                     >
                         <ScrollView>
                             {/* Products Images */}
-                            <ProductImages images={values.images} />
+                            <ProductImages images={[...product.images, ...selectedImagens]} /> {/* se agregan las imagenes del store a las del producto*/}
 
                             <ThemedView style={{ marginHorizontal: 10, marginTop: 20 }}>
                                 <ThemedTextInput

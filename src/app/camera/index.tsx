@@ -1,17 +1,22 @@
+import { useCameraStore } from '@/presentation/store/useCameraStore';
 import { ThemedText } from '@/presentation/theme/components/themed-text';
 import { useTheme } from '@/presentation/theme/hooks/use-theme';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
+import * as ImagePicker from 'expo-image-picker';
+import { Asset, usePermissions } from 'expo-media-library';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
-export default async function CameraScreen() {
+
+export default function CameraScreen() {
+
+    const { AddSelectedImage } = useCameraStore();
+
     const [facing, setFacing] = useState<CameraType>('back');
     const [cameraPermissions, requestCameraPermission] = useCameraPermissions();
-    const [mediapermission, requestMediaPermission] = MediaLibrary.usePermissions();
-
+    const [mediaPermission, requestMediaPermission] = usePermissions();
 
     const [selectedImagen, setSelectedImagen] = useState<string>();
 
@@ -33,28 +38,26 @@ export default async function CameraScreen() {
 
         } catch (error) {
             console.log(error);
-            Alert.alert('Error', 'Algo salio mal con los permisos')
+            Alert.alert('Error', 'Algo salio mal con los permisos');
         }
-    }
+    };
 
-    if (!cameraPermissions) {
-        // Camera permissions are still loading.
+    if (!cameraPermissions || !mediaPermission) {
+        // Permissions are still loading.
         return <View />;
     }
 
-    if (!cameraPermissions.granted) {
-        // Camera permissions are not granted yet.
+    if (!cameraPermissions.granted || !mediaPermission.granted) {
+        // Permissions are not granted yet.
         return (
             <View style={styles.container}>
-                <Text style={styles.message}>Necesitamos permiso para usar camara y la galeria</Text>
+                <Text style={styles.message}>Necesitamos permiso para usar la cámara y la galería</Text>
 
                 <TouchableOpacity onPress={onRequestPermissions} >
                     <ThemedText type='subtitle'>
                         Solicitar permiso
                     </ThemedText>
                 </TouchableOpacity>
-
-
             </View>
         );
     }
@@ -64,29 +67,47 @@ export default async function CameraScreen() {
 
         const picture = await cameraRef.current.takePictureAsync({
             quality: 0.7 //calidad con la que se toma la foto
-        })
+        });
 
         console.log(picture);
         if (!picture.uri) return;
 
         setSelectedImagen(picture.uri);
-
-        //TODO: guardar imagen
-    }
-
+    };
 
     const onReturnCancel = () => {
-        //TODO: limpiar estadoo
         router.dismiss();
-    }
+    };
 
-    const onPictureAccepted = () => {
-        //TODO: Implementar funcion
+    const onPictureAccepted = async () => {
+        if (!selectedImagen) return;
 
-    }
+        try {
+            await Asset.create(selectedImagen); //guarda la imagen en la galeria
+            AddSelectedImage(selectedImagen); // se guarda en el store
+            Alert.alert('Guardado', 'Imagen guardada en la galería');
+            router.dismiss();
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Error', 'No se pudo guardar la imagen');
+        }
+    };
 
     const onRetakePicture = () => {
         setSelectedImagen(undefined);
+    };
+
+    const onPickImagens = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 0.5,
+            aspect: [4, 3], //dimensiones de la imagen (ancho, alto)
+            allowsEditing: true
+        });
+
+        if (result.canceled) return;
+
+        console.log(result.assets);
     }
 
     function toggleCameraFacing() {
@@ -104,9 +125,8 @@ export default async function CameraScreen() {
 
                 <ReturnCancelButton onPress={onReturnCancel} />
             </View>
-        )
+        );
     }
-
 
     return (
         <View style={styles.container}>
@@ -125,7 +145,6 @@ export default async function CameraScreen() {
 
 //CUSTOM COMPONENTS
 const ShutterButton = ({ onPress = () => { } }) => {
-
     const dimension = useWindowDimensions();
     const primaryColor = useTheme().primary;
 
@@ -141,11 +160,10 @@ const ShutterButton = ({ onPress = () => { } }) => {
                     backgroundColor: primaryColor,
                 }
             ]}>
-            <Text style={styles.text}>Flip Camera</Text>
+            <Ionicons name="camera-outline" size={30} color="white" />
         </TouchableOpacity>
-    )
-}
-
+    );
+};
 
 const FlipCameraButton = ({ onPress = () => { } }) => {
     return (
@@ -155,8 +173,8 @@ const FlipCameraButton = ({ onPress = () => { } }) => {
         >
             <Ionicons name="camera-reverse-outline" size={24} color="white" />
         </TouchableOpacity>
-    )
-}
+    );
+};
 
 const GalleryButton = ({ onPress = () => { } }) => {
     return (
@@ -166,8 +184,8 @@ const GalleryButton = ({ onPress = () => { } }) => {
         >
             <Ionicons name="image-outline" size={24} color="white" />
         </TouchableOpacity>
-    )
-}
+    );
+};
 
 const ReturnCancelButton = ({ onPress = () => { } }) => {
     return (
@@ -177,13 +195,10 @@ const ReturnCancelButton = ({ onPress = () => { } }) => {
         >
             <Ionicons name="arrow-back-outline" size={24} color="white" />
         </TouchableOpacity>
-    )
-}
-
-
+    );
+};
 
 const ConfirmImagenButton = ({ onPress = () => { } }) => {
-
     const dimension = useWindowDimensions();
     const primaryColor = useTheme().primary;
 
@@ -199,10 +214,10 @@ const ConfirmImagenButton = ({ onPress = () => { } }) => {
                     backgroundColor: primaryColor,
                 }
             ]}>
-            <Ionicons name="checkmark-outline" size={30} color={primaryColor} />
+            <Ionicons name="checkmark-outline" size={30} color="white" />
         </TouchableOpacity>
-    )
-}
+    );
+};
 
 const RetakeImagenButton = ({ onPress = () => { } }) => {
     return (
@@ -212,8 +227,8 @@ const RetakeImagenButton = ({ onPress = () => { } }) => {
         >
             <Ionicons name="close-outline" size={24} color="white" />
         </TouchableOpacity>
-    )
-}
+    );
+};
 
 
 const styles = StyleSheet.create({
