@@ -47,7 +47,7 @@ export const authLogin = async (email: string, password: string) => {
         return returnUserToken(data);
 
     } catch (error) {
-        //throw new Error('Error al iniciar sesión');
+        console.error('Error en authLogin:', error);
         return null;
     }
 }
@@ -78,6 +78,7 @@ export const authRegister = async (fullName: string, email: string, password: st
         return { ok: true as const, user, token };
 
     } catch (error) {
+        console.error('Error en authRegister:', error);
         let message = 'Error al crear la cuenta';
 
         if (axios.isAxiosError(error)) {

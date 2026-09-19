@@ -48,11 +48,11 @@ const LoginScreen = () => {
       style={{ flex: 1 }}
     >
       <ScrollView style={{
-        paddingHorizontal: 40,
+        paddingHorizontal: 30,
         backgroundColor: backgroundColor
       }}>
         <View style={{
-          paddingTop: height * 0.35
+          paddingTop: height * 0.22
         }}>
           <ThemedText type="title">Ingresar</ThemedText>
           <ThemedText style={{ color: 'grey' }}>Por favor ingrese para continuar</ThemedText>

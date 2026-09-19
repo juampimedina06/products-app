@@ -102,12 +102,19 @@ export default function CameraScreen() {
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 0.5,
             aspect: [4, 3], //dimensiones de la imagen (ancho, alto)
-            allowsEditing: true
+            // allowsEditing: true,
+            allowsMultipleSelection: true, // permite seleccionar varias imagenes
+            selectionLimit: 5 // permite seleccionar hasta 5 imagenes
         });
 
         if (result.canceled) return;
 
-        console.log(result.assets);
+        result.assets.forEach(asset => {
+            AddSelectedImage(asset.uri);
+        })
+
+        router.dismiss();
+
     }
 
     function toggleCameraFacing() {
@@ -136,7 +143,7 @@ export default function CameraScreen() {
             <FlipCameraButton onPress={toggleCameraFacing} />
 
             {/* TODO: abrir galeria*/}
-            <GalleryButton onPress={() => { }} />
+            <GalleryButton onPress={onPickImagens} />
 
             <ReturnCancelButton onPress={onReturnCancel} />
         </View>

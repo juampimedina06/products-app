@@ -10,7 +10,7 @@ import ThemedTextInput from '@/presentation/theme/components/ThemedTextInput'
 import { Redirect, router, useLocalSearchParams, useNavigation } from 'expo-router'
 import { Formik } from 'formik'
 import { useEffect } from 'react'
-import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native'
+import { ActivityIndicator, KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native'
 
 const ProductScreen = () => {
 
@@ -61,17 +61,29 @@ const ProductScreen = () => {
     return (
         <Formik
             initialValues={product}
-            onSubmit={(productLike) => productMutation.mutate(productLike)}
+            onSubmit={(productLike) =>
+                productMutation.mutate({
+                    ...productLike,
+                    images: [...productLike.images, ...selectedImagens]
+                })}
         >
             {
 
                 ({ values, handleSubmit, handleChange, setFieldValue }) => (
                     <KeyboardAvoidingView
                         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                        style={{ flex: 1 }}
                     >
-                        <ScrollView>
-                            {/* Products Images */}
-                            <ProductImages images={[...product.images, ...selectedImagens]} /> {/* se agregan las imagenes del store a las del producto*/}
+                        <ScrollView
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={productQuery.isFetching}
+                                    onRefresh={async () => await productQuery.refetch()}
+                                />
+                            }
+                            style={{ flex: 1 }}>
+                            {/* Products Images - se agregan las imagenes del store a las del producto */}
+                            <ProductImages images={[...(product.images ?? []), ...(selectedImagens ?? [])]} />
 
                             <ThemedView style={{ marginHorizontal: 10, marginTop: 20 }}>
                                 <ThemedTextInput
@@ -101,12 +113,13 @@ const ProductScreen = () => {
                                 <ThemedTextInput
                                     placeholder='Precio'
                                     style={{ flex: 1 }}
-                                    value={values.price.toString()}
+                                    value={(values.price ?? 0).toString()}
                                     onChangeText={handleChange('price')}
-                                /><ThemedTextInput
+                                />
+                                <ThemedTextInput
                                     placeholder='Inventario'
                                     style={{ flex: 1 }}
-                                    value={values.stock.toString()}
+                                    value={(values.stock ?? 0).toString()}
                                     onChangeText={handleChange('stock')}
                                 />
 
@@ -117,12 +130,12 @@ const ProductScreen = () => {
                             >
                                 <ThemedButtonGroup
                                     options={['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']}
-                                    selectedOption={values.sizes}
+                                    selectedOption={values.sizes ?? []}
                                     onSelec={(selectedSizes) => {
 
-                                        const newSizeValue = values.sizes.includes(selectedSizes as Size)
+                                        const newSizeValue = (values.sizes ?? []).includes(selectedSizes as Size)
                                             ? values.sizes.filter(s => s !== selectedSizes)
-                                            : [...values.sizes, selectedSizes]
+                                            : [...(values.sizes ?? []), selectedSizes]
                                         setFieldValue('sizes', newSizeValue)
                                     }}
                                 />

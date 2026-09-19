@@ -54,7 +54,7 @@ const RegisterScreen = () => {
       <ScrollView
         keyboardShouldPersistTaps="handled"
         style={{
-          paddingHorizontal: 40,
+          paddingHorizontal: 30,
           backgroundColor: backgroundColor
         }}
       >
